@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const logger = require('./middleware/logger');
 const morgan = require('morgan');
+const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 
 //To import routes
@@ -24,6 +25,8 @@ if(process.env.NODE_ENV === 'development'){
 
 //To mount routes
 app.use("/api/v1/bootcamps", bootcamps);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
