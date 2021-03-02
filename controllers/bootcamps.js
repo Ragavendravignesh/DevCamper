@@ -8,7 +8,19 @@ const Mongoose = require('mongoose');
 // @route GET api/v1/bootcamps
 // @access Public
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
-  const bootcamps = await Bootcamp.find();
+  let query;
+
+  let queryStr = JSON.stringify(req.query);
+
+  console.log(queryStr);
+
+  queryStr = queryStr.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    match => `$${match}`
+  );
+  console.log(queryStr);
+  query = await Bootcamp.find(JSON.parse(queryStr));
+  const bootcamps = query;
 
   res
     .status(200)
@@ -102,5 +114,7 @@ exports.getBootCampByRadius = asyncHandler(async (req, res, next) => {
   });
   console.log(bootcamps);
 
-  res.status(200).json({ success: true, count: bootcamps.length, data: bootcamps });
+  res
+    .status(200)
+    .json({ success: true, count: bootcamps.length, data: bootcamps });
 });
