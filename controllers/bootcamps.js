@@ -1,6 +1,7 @@
 const Bootcamp = require('../models/Bootcamp');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const Mongoose = require('mongoose');
 
 // @desc Get all bootcamps
 // @route GET api/v1/bootcamps
@@ -62,10 +63,10 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 });
 
 // @desc Delete a bootcamp
-// @route DELETE api/v1/bootcamps/:id
+// @route DELETE api/v1/bootcamps/delete/:id
 // @access Private
 exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
-  const bootcamp = Bootcamp.findByIdAndDelete(req.params.id);
+  const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
 
   if (!bootcamp) {
     return next(
