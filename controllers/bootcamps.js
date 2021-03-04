@@ -10,17 +10,45 @@ const Mongoose = require('mongoose');
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
   let query;
 
-  let queryStr = JSON.stringify(req.query);
+  //Copy req into a new object
+  const reqQuery = { ...req.query };
+  console.log(reqQuery);
 
-  console.log(queryStr);
+  //array for remove keywords
+  const removeFields = ['select', 'sort'];
 
+  //removing those keywords from request
+  removeFields.forEach((param) => delete reqQuery[param]);
+
+  console.log(reqQuery);
+  //converting into a string
+  let queryStr = JSON.stringify(reqQuery);
+
+  //converting into $gt $lt etc
   queryStr = queryStr.replace(
     /\b(gt|gte|lt|lte|in)\b/g,
-    match => `$${match}`
+    (match) => `$${match}`
   );
-  console.log(queryStr);
-  query = await Bootcamp.find(JSON.parse(queryStr));
-  const bootcamps = query;
+
+  //Making request
+  query = Bootcamp.find(JSON.parse(queryStr));
+
+  // if request is select
+  if (req.query.select) {
+    const fields = req.query.select.split(',').join(' ');
+    console.log(fields);
+    query = query.select(fields);
+  }
+
+  //sort
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ');
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort('-createdAt');
+  }
+  //storing response
+  const bootcamps = await query;
 
   res
     .status(200)
