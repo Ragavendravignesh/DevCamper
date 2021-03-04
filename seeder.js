@@ -1,10 +1,12 @@
 const fs = require('fs');
 const mongoose = require('mongoose');
-const Bootcamp = require('./models/Bootcamp');
 const dotenv = require('dotenv');
 const { dirname } = require('path');
 
 dotenv.config({ path: './config/config.env' });
+
+const Bootcamp = require('./models/Bootcamp');
+const Course = require('./models/Course');
 
 mongoose.connect(process.env.MONGO_URI, {
   useCreateIndex: true,
@@ -17,9 +19,12 @@ const bootcamps = JSON.parse(
   fs.readFileSync(`${__dirname}/_data/bootcamps.json`)
 );
 
+const courses = JSON.parse(fs.readFileSync(`${__dirname}/_data/courses.json`));
+
 const importData = async function () {
   try {
     await Bootcamp.create(bootcamps);
+    await Course.create(courses);
 
     console.log('Data Imported');
     process.exit();
@@ -31,6 +36,7 @@ const importData = async function () {
 const deleteData = async function () {
   try {
     await Bootcamp.deleteMany();
+    await Course.deleteMany();
 
     console.log('Data deleted');
     process.exit();
