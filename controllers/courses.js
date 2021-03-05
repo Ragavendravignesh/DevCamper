@@ -3,6 +3,7 @@ const asyncHandler = require('../middleware/async');
 
 const Course = require('../models/Course');
 const Bootcamp = require('../models/Bootcamp');
+const { findById, listenerCount } = require('../models/Bootcamp');
 
 // @desc Get all courses
 // @route GET api/v1/courses - get all course
@@ -11,7 +12,6 @@ const Bootcamp = require('../models/Bootcamp');
 exports.getCourses = asyncHandler(async (req, res, next) => {
   let query;
 
-  console.log('hello');
   if (req.params.bootcampId) {
     query = Course.find({ bootcamp: req.params.bootcampId });
   } else {
@@ -50,7 +50,7 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
 // @access Private
 exports.addCourse = asyncHandler(async (req, res, next) => {
   req.body.bootcamp = req.params.bootcampId;
-  
+
   const bootcamp = await Bootcamp.findById(req.params.bootcampId);
 
   if (!bootcamp) {
@@ -64,4 +64,44 @@ exports.addCourse = asyncHandler(async (req, res, next) => {
 
   const course = await Course.create(req.body);
   res.status(200).json({ sucess: true, data: course });
+});
+
+// @desc PUT Update a course
+// @route PUT api/v1/courses/:id
+// @access Private
+exports.updateCourse = asyncHandler(async (req, res, next) => {
+  let course = await Course.findById(req.params.id);
+
+  if (!course) {
+    return next(
+      new ErrorResponse(
+        `Cannot able to fetch a course with an id of ${req.params.id}`,
+        404
+      )
+    );
+  }
+
+  course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  res.status(200).json({ sucess: true, data: course });
+});
+
+// @desc DELETE To Delete a course
+// @route DELETE api/v1/courses/:id
+// @access Private
+exports.deleteCourse = asyncHandler(async (req, res, next) => {
+  let course = await Course.findById(req.params.id);
+
+  if (!course) {
+    return next(
+      new ErrorResponse(
+        `Cannot able to fetch a course with an id of ${req.params.id}`,
+        404
+      )
+    );
+  }
+  await course.remove();
+  res.status(200).json({ sucess: true, data: {} });
 });

@@ -12,7 +12,6 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
   //Copy req into a new object
   const reqQuery = { ...req.query };
-  console.log(reqQuery);
 
   //array for remove keywords
   const removeFields = ['select', 'sort', 'limit', 'page'];
@@ -35,7 +34,6 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
   // if request is select
   if (req.query.select) {
     const fields = req.query.select.split(',').join(' ');
-    console.log(fields);
     query = query.select(fields);
   }
 
@@ -52,8 +50,6 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
   const total = await Bootcamp.countDocuments();
-
-  console.log(limit, ' - ', startIndex);
 
   query = query.skip(startIndex).limit(limit);
 
@@ -171,7 +167,6 @@ exports.getBootCampByRadius = asyncHandler(async (req, res, next) => {
       $geoWithin: { $centerSphere: [[lng, lat], radius] },
     },
   });
-  console.log(bootcamps);
 
   res
     .status(200)
