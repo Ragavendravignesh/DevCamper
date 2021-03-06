@@ -4,6 +4,8 @@ const logger = require('./middleware/logger');
 const morgan = require('morgan');
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
+const fileupload = require('express-fileupload');
+const path = require('path');
 
 // To load environnment values
 dotenv.config({ path: './config/config.env' });
@@ -23,6 +25,11 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+//To use file upload
+app.use(fileupload());
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 //To mount routes
 app.use('/api/v1/bootcamps', bootcamps);
