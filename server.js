@@ -13,6 +13,7 @@ dotenv.config({ path: './config/config.env' });
 //To import routes
 const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
+const auth = require('./routes/auth');
 
 //To connect to database
 connectDB();
@@ -34,6 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //To mount routes
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
+app.use('/api/v1/auth', auth);
 
 app.use(errorHandler);
 
