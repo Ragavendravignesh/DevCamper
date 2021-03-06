@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 const fileupload = require('express-fileupload');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 
 // To load environnment values
@@ -20,7 +21,12 @@ connectDB();
 
 const app = express();
 
+//body parser
 app.use(express.json());
+
+//cookie parser
+app.use(cookieParser());
+
 //app.use(logger);
 
 if (process.env.NODE_ENV === 'development') {
