@@ -132,7 +132,7 @@ BootcampSchema.pre('save', async function (next) {
   next();
 });
 
-//remove correspondinf courses
+//remove corresponding courses
 BootcampSchema.pre('remove', async function (next) {
   await mongoose.model('Course').deleteMany({ bootcamp: this._id });
   next();
