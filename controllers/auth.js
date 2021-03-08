@@ -64,3 +64,12 @@ const sendTokenResponse = (user, statusCode, res) => {
     .cookie('token', token, options)
     .json({ success: true, token });
 };
+
+// @desc Get an user
+// @route GET api/v1/auth/me
+// @access Public
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({ success: true, data: user });
+});
