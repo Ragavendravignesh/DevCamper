@@ -5,6 +5,7 @@ const geoCoder = require('../utils/geocoder');
 const Mongoose = require('mongoose');
 const path = require('path');
 const advancedResults = require('../middleware/advancedResults');
+const { listeners } = require('cluster');
 
 // @desc Get all bootcamps
 // @route GET api/v1/bootcamps
@@ -36,7 +37,6 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 // @route POST api/v1/bootcamps
 // @access Private
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
-  
   //Add user to req.body
   req.body.user = req.user.id;
 
@@ -44,8 +44,13 @@ exports.createBootcamp = asyncHandler(async (req, res, next) => {
   const publishedBootcamp = await Bootcamp.findOne({ user: req.user.id });
 
   //A user other than admin, could only publish a single bootcamp
-  if(publishedBootcamp && req.user.role !== 'admin'){
-    return next(new ErrorResponse(`Sorry a user with id ${req.user.id} could only publish a single course`,400));
+  if (publishedBootcamp && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `Sorry a user with id ${req.user.id} could only publish a single course`,
+        400
+      )
+    );
   }
 
   const bootcamp = await Bootcamp.create(req.body);
@@ -56,10 +61,7 @@ exports.createBootcamp = asyncHandler(async (req, res, next) => {
 // @route PUT api/v1/bootcamps/:id
 // @access Private
 exports.updateBootcamp = asyncHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  let bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp) {
     return next(
@@ -69,6 +71,21 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
       )
     );
   }
+
+  //Make sure user owns the bootcamp
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `Sorry, user ${req.user.id} with an id not owns this bootcamp`,
+        401
+      )
+    );
+  }
+
+  bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
   res.status(200).json({ success: true, data: bootcamp });
 });
@@ -84,6 +101,16 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
       new ErrorResponse(
         `Cannot fetch a Bootcamp with an id of ${req.params.id}`,
         404
+      )
+    );
+  }
+
+  //Make sure user owns the bootcamp
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `Sorry, user ${req.user.id} with an id not owns this bootcamp`,
+        401
       )
     );
   }
@@ -130,6 +157,16 @@ exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
       new ErrorResponse(
         `Cannot fetch a Bootcamp with an id of ${req.params.id}`,
         404
+      )
+    );
+  }
+
+  //Make sure user owns the bootcamp
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `Sorry, user ${req.user.id} with an id not owns this bootcamp`,
+        401
       )
     );
   }
