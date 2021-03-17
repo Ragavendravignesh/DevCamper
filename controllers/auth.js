@@ -1,6 +1,7 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
+const sendEmail = require('../utils/sendEmail');
 
 // @desc Resiter a user
 // @route POST api/v1/auth/register
@@ -44,6 +45,54 @@ exports.login = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res);
 });
 
+// @desc Get an user
+// @route GET api/v1/auth/me
+// @access Public
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({ success: true, data: user });
+});
+
+// @desc forgot passowrd
+// @route POST api/v1/auth/forgotpassword
+// @access Public
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return next(new ErrorResponse('User not exist with an email id', 401));
+  }
+
+  const resetToken = user.getResetPasswordToken();
+
+  const resetUrl = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/resettoken/${resetToken}`;
+
+  const message = `You are receiving this mail because you or someone else requested for a password reset. To reset your password, please make a PUT request to ${resetUrl}`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Password Reset Token',
+      message,
+    });
+
+    res.status(200).json({ sucess: true, data: 'Email Sent.' });
+  } catch (err) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save({ validateBeforeSave: false });
+    return next(new ErrorResponse('Email could not be sent', 500));
+  }
+
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({ success: true, data: user });
+});
+
 const sendTokenResponse = (user, statusCode, res) => {
   //create Token
   const token = user.getSignedJwtToken();
@@ -64,12 +113,3 @@ const sendTokenResponse = (user, statusCode, res) => {
     .cookie('token', token, options)
     .json({ success: true, token });
 };
-
-// @desc Get an user
-// @route GET api/v1/auth/me
-// @access Public
-exports.getMe = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
-
-  res.status(200).json({ success: true, data: user });
-});
