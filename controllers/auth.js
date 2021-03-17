@@ -66,6 +66,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
   const resetToken = user.getResetPasswordToken();
 
+  await user.save({ validateBeforeSave: false });
+
   const resetUrl = `${req.protocol}://${req.get(
     'host'
   )}/api/v1/resettoken/${resetToken}`;
@@ -87,10 +89,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
     return next(new ErrorResponse('Email could not be sent', 500));
   }
-
-  await user.save({ validateBeforeSave: false });
-
-  res.status(200).json({ success: true, data: user });
 });
 
 const sendTokenResponse = (user, statusCode, res) => {
