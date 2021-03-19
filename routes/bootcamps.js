@@ -10,8 +10,8 @@ const {
 } = require('../controllers/bootcamps');
 
 const Bootcamp = require('../models/Bootcamp');
-const advancedResults = require('../middleware/advancedResults');
 
+const advancedResults = require('../middleware/advancedResults');
 const { protect, authorize } = require('../middleware/auth');
 
 //import other resource router
