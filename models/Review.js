@@ -61,7 +61,6 @@ ReviewSchema.statics.getAverageRating = async function (bootcampId) {
   });
   
   ReviewSchema.post('remove', async function () {
-      console.log('hi');
     await this.constructor.getAverageRating(this.bootcamp);
   });
 
