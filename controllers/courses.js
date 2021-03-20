@@ -11,7 +11,7 @@ const { findById, listenerCount } = require('../models/Bootcamp');
 // @access Public
 exports.getCourses = asyncHandler(async (req, res, next) => {
   if (req.params.bootcampId) {
-    const result = Course.find({ bootcamp: req.params.bootcampId });
+    const result = await Course.find({ bootcamp: req.params.bootcampId });
 
     res.status(200).json({ success: true, count: result.length, data: result });
   } else {
