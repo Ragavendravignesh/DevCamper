@@ -8,6 +8,7 @@ const fileupload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const mongoSantize = require('express-mongo-sanitize');
+const helmet = require('helmet');
 
 // To load environnment values
 dotenv.config({ path: './config/config.env' });
@@ -41,6 +42,9 @@ app.use(fileupload());
 
 //To Santize requests
 app.use(mongoSantize());
+
+//Set security headers
+app.use(helmet());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
