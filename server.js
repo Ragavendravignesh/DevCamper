@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const mongoSantize = require('express-mongo-sanitize');
 const helmet = require('helmet');
+const xss = require('xss-clean');
 
 // To load environnment values
 dotenv.config({ path: './config/config.env' });
@@ -30,6 +31,9 @@ app.use(express.json());
 
 //cookie parser
 app.use(cookieParser());
+
+//To prevent XSS attacks
+app.use(xss());
 
 //app.use(logger);
 
