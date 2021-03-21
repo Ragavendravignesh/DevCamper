@@ -46,6 +46,18 @@ exports.login = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res);
 });
 
+// @desc logout a user
+// @route GET api/v1/auth/logout
+// @access Private
+exports.logout = asyncHandler(async (req, res, next) => {
+  res.cookie('token', 'none', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({ success: true, data: {} });
+});
+
 // @desc Get an user
 // @route GET api/v1/auth/me
 // @access Public
@@ -142,7 +154,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   if (!(await user.matchPassword(req.body.currentPassword))) {
     return next(new ErrorResponse('Password did not match', 401));
   }
-  
+
   user.password = req.body.newPassword;
 
   await user.save();
